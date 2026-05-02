@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tax Calculator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
     <style>
       * {
         box-sizing: border-box;
@@ -199,6 +200,27 @@
         padding: 12px 20px;
         font-size: 14px;
       }
+      .message.assistant ul,
+      .message.assistant ol {
+        margin-left: 20px;
+        margin-top: 8px;
+        margin-bottom: 8px;
+      }
+
+      .message.assistant p {
+        margin-bottom: 8px;
+      }
+
+      .message.assistant strong {
+        font-weight: 700;
+      }
+
+      .message.assistant h3 {
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 6px;
+        margin-top: 10px;
+      }
     </style>
   </head>
   <body>
@@ -345,11 +367,15 @@
         btn.disabled = false;
       }
 
-      function addMessage(text, type) {
+     function addMessage(text, type) {
         const messages = document.getElementById('chat-messages');
         const div = document.createElement('div');
         div.className = `message ${type}`;
-        div.textContent = text;
+        if (type === 'assistant') {
+          div.innerHTML = marked.parse(text);
+        } else {
+          div.textContent = text;
+        }
         messages.appendChild(div);
         messages.scrollTop = messages.scrollHeight;
         return div;
