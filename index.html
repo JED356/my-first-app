@@ -332,12 +332,11 @@
           // Remove thinking indicator
           thinking.remove();
 
-          if (data.reply) {
+         if (data.reply) {
             addMessage(data.reply, 'assistant');
           } else {
-            addMessage('Sorry, something went wrong. Please try again.', 'assistant');
+            addMessage('Error: ' + JSON.stringify(data), 'assistant');
           }
-
         } catch (error) {
           thinking.remove();
           addMessage('Sorry, something went wrong. Please try again.', 'assistant');
