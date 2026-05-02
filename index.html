@@ -339,7 +339,7 @@
           }
         } catch (error) {
           thinking.remove();
-          addMessage('Sorry, something went wrong. Please try again.', 'assistant');
+          addMessage('Sorry, something went wrong. Please try again.' + JSON.stringify(data), 'assistant');
         }
 
         btn.disabled = false;
