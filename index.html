@@ -356,6 +356,9 @@
 
          if (data.reply) {
             addMessage(data.reply, 'assistant');
+            if (data.dbError) {
+              addMessage('⚠️ Database error: ' + data.dbError, 'assistant');
+            }
           } else {
             addMessage('Error: ' + JSON.stringify(data), 'assistant');
           }
