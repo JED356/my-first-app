@@ -286,7 +286,42 @@
       </div>
 
     </div>
+// Load conversation history when page opens
+      async function loadHistory() {
+        try {
+          const response = await fetch('/api/history');
+          const data = await response.json();
 
+          if (data.conversations && data.conversations.length > 0) {
+            // Clear the welcome message
+            const messages = document.getElementById('chat-messages');
+            messages.innerHTML = '';
+
+            // Add a history label
+            const label = document.createElement('div');
+            label.style.cssText = 'text-align:center; font-size:11px; color:#aaa; margin-bottom:8px;';
+            label.textContent = 'Previous conversations';
+            messages.appendChild(label);
+
+            // Display each conversation
+            data.conversations.forEach(conv => {
+              addMessage(conv.question, 'user');
+              addMessage(conv.answer, 'assistant');
+            });
+
+            // Add a divider
+            const divider = document.createElement('div');
+            divider.style.cssText = 'text-align:center; font-size:11px; color:#aaa; margin-top:8px;';
+            divider.textContent = '— New conversation —';
+            messages.appendChild(divider);
+          }
+        } catch (error) {
+          console.error('Could not load history:', error);
+        }
+      }
+
+      // Run when page loads
+      window.onload = loadHistory;
     <script>
       // Tax calculator
       function calculate() {
