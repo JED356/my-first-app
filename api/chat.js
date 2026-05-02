@@ -59,7 +59,7 @@ export default async function handler(req, res) {
 
     if (dbError) {
       console.error('Database error:', dbError);
-      // Still return the reply even if saving fails
+      return res.status(200).json({ reply, dbError: dbError.message });
     }
 
     return res.status(200).json({ reply });
