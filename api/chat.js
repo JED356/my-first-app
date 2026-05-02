@@ -1,3 +1,10 @@
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+);
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -9,13 +16,13 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'No message provided' });
   }
 
-  // Check if API key is being picked up
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return res.status(500).json({ error: 'API key not found in environment' });
   }
 
   try {
+    // Call Claude API
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -33,24 +40,34 @@ export default async function handler(req, res) {
       })
     });
 
-    // Get the raw response for debugging
     const data = await response.json();
-    
+
     if (!response.ok) {
-      return res.status(500).json({ 
-        error: 'Claude API error', 
+      return res.status(500).json({
+        error: 'Claude API error',
         status: response.status,
-        details: data 
+        details: data
       });
     }
 
     const reply = data.content[0].text;
+
+    // Save conversation to database
+    const { error: dbError } = await supabase
+      .from('conversations')
+      .insert([{ question: message, answer: reply }]);
+
+    if (dbError) {
+      console.error('Database error:', dbError);
+      // Still return the reply even if saving fails
+    }
+
     return res.status(200).json({ reply });
 
   } catch (error) {
-    return res.status(500).json({ 
-      error: 'Server error', 
-      details: error.message 
+    return res.status(500).json({
+      error: 'Server error',
+      details: error.message
     });
   }
 }
