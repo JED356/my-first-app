@@ -16,17 +16,21 @@
         background-color: #f0f4f8;
         display: flex;
         justify-content: center;
-        align-items: center;
+        padding: 40px 20px;
         min-height: 100vh;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 560px;
       }
 
       .card {
         background: white;
         border-radius: 12px;
         padding: 40px;
-        width: 100%;
-        max-width: 480px;
         box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        margin-bottom: 24px;
       }
 
       .logo {
@@ -40,6 +44,12 @@
 
       h1 {
         font-size: 24px;
+        color: #1a1a2e;
+        margin-bottom: 8px;
+      }
+
+      h2 {
+        font-size: 18px;
         color: #1a1a2e;
         margin-bottom: 8px;
       }
@@ -58,7 +68,7 @@
         margin-bottom: 6px;
       }
 
-      input {
+      input[type="number"] {
         width: 100%;
         padding: 12px 16px;
         border: 1px solid #ddd;
@@ -69,7 +79,7 @@
         transition: border-color 0.2s;
       }
 
-      input:focus {
+      input[type="number"]:focus {
         border-color: #0066cc;
       }
 
@@ -88,6 +98,11 @@
 
       button:hover {
         background-color: #0052a3;
+      }
+
+      button:disabled {
+        background-color: #aaa;
+        cursor: not-allowed;
       }
 
       .result {
@@ -121,46 +136,137 @@
         color: #aaa;
         text-align: center;
       }
+
+      /* Chat styles */
+      .chat-messages {
+        min-height: 120px;
+        max-height: 320px;
+        overflow-y: auto;
+        margin-bottom: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .message {
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        line-height: 1.6;
+        max-width: 90%;
+      }
+
+      .message.user {
+        background-color: #0066cc;
+        color: white;
+        align-self: flex-end;
+      }
+
+      .message.assistant {
+        background-color: #f0f4f8;
+        color: #333;
+        align-self: flex-start;
+      }
+
+      .message.thinking {
+        background-color: #f0f4f8;
+        color: #aaa;
+        align-self: flex-start;
+        font-style: italic;
+      }
+
+      .chat-input-row {
+        display: flex;
+        gap: 8px;
+      }
+
+      .chat-input-row input {
+        flex: 1;
+        padding: 12px 16px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 14px;
+        outline: none;
+        margin-bottom: 0;
+      }
+
+      .chat-input-row input:focus {
+        border-color: #0066cc;
+      }
+
+      .chat-input-row button {
+        width: auto;
+        padding: 12px 20px;
+        font-size: 14px;
+      }
     </style>
   </head>
   <body>
-    <div class="card">
-      <div class="logo">TaxAI</div>
-      <h1>2024 Income Tax Estimator</h1>
-      <p class="subtitle">Enter your annual income to get a quick estimate.</p>
+    <div class="container">
 
-      <label for="income">Annual Income ($)</label>
-      <input
-        type="number"
-        id="income"
-        placeholder="e.g. 120000"
-      />
+      <!-- Tax Calculator Card -->
+      <div class="card">
+        <div class="logo">TaxAI</div>
+        <h1>Income Tax Estimator</h1>
+        <p class="subtitle">Enter your annual income to get a quick estimate.</p>
 
-      <button onclick="calculate()">Calculate Tax</button>
+        <label for="income">Annual Income ($)</label>
+        <input
+          type="number"
+          id="income"
+          placeholder="e.g. 120000"
+        />
 
-      <div class="result" id="result">
-        <div class="result-row">
-          <span>Gross Income</span>
-          <span id="r-income"></span>
+        <button onclick="calculate()">Calculate Tax</button>
+
+        <div class="result" id="result">
+          <div class="result-row">
+            <span>Gross Income</span>
+            <span id="r-income"></span>
+          </div>
+          <div class="result-row">
+            <span>Estimated Tax</span>
+            <span id="r-tax"></span>
+          </div>
+          <div class="result-row">
+            <span>Medicare Levy</span>
+            <span id="r-medicare"></span>
+          </div>
+          <div class="result-row total">
+            <span>Net Income</span>
+            <span id="r-net"></span>
+          </div>
         </div>
-        <div class="result-row">
-          <span>Estimated Tax</span>
-          <span id="r-tax"></span>
+
+        <p class="footer">Estimate only. Not financial advice.</p>
+      </div>
+
+      <!-- AI Chat Card -->
+      <div class="card">
+        <h2>Ask a Tax Question</h2>
+        <p class="subtitle">Get AI-powered answers to your Australian tax questions.</p>
+
+        <div class="chat-messages" id="chat-messages">
+          <div class="message assistant">
+            Hi! I'm your Australian tax assistant. Ask me anything about tax — deductions, brackets, GST, company tax, and more.
+          </div>
         </div>
-        <div class="result-row">
-          <span>Medicare Levy</span>
-          <span id="r-medicare"></span>
-        </div>
-        <div class="result-row total">
-          <span>Net Income</span>
-          <span id="r-net"></span>
+
+        <div class="chat-input-row">
+          <input
+            type="text"
+            id="chat-input"
+            placeholder="e.g. Can I claim my home office?"
+            onkeydown="if(event.key==='Enter') sendMessage()"
+          />
+          <button onclick="sendMessage()" id="send-btn">Send</button>
         </div>
       </div>
 
-      <p class="footer">Estimate only. Not financial advice.</p>
     </div>
 
     <script>
+      // Tax calculator
       function calculate() {
         const income = parseFloat(document.getElementById('income').value);
 
@@ -169,7 +275,7 @@
           return;
         }
 
-        // Simplified Australian tax brackets 2024
+        // Australian tax brackets 2025
         let tax = 0;
         if (income <= 18200) {
           tax = 0;
@@ -186,7 +292,6 @@
         const medicare = income * 0.02;
         const net = income - tax - medicare;
 
-        // Format as currency
         const fmt = (n) => '$' + Math.round(n).toLocaleString();
 
         document.getElementById('r-income').textContent = fmt(income);
@@ -195,6 +300,60 @@
         document.getElementById('r-net').textContent = fmt(net);
 
         document.getElementById('result').style.display = 'block';
+      }
+
+      // AI Chat
+      async function sendMessage() {
+        const input = document.getElementById('chat-input');
+        const message = input.value.trim();
+
+        if (!message) return;
+
+        // Show user message
+        addMessage(message, 'user');
+        input.value = '';
+
+        // Disable button while waiting
+        const btn = document.getElementById('send-btn');
+        btn.disabled = true;
+
+        // Show thinking indicator
+        const thinking = addMessage('Thinking...', 'thinking');
+
+        try {
+          const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message })
+          });
+
+          const data = await response.json();
+
+          // Remove thinking indicator
+          thinking.remove();
+
+          if (data.reply) {
+            addMessage(data.reply, 'assistant');
+          } else {
+            addMessage('Sorry, something went wrong. Please try again.', 'assistant');
+          }
+
+        } catch (error) {
+          thinking.remove();
+          addMessage('Sorry, something went wrong. Please try again.', 'assistant');
+        }
+
+        btn.disabled = false;
+      }
+
+      function addMessage(text, type) {
+        const messages = document.getElementById('chat-messages');
+        const div = document.createElement('div');
+        div.className = `message ${type}`;
+        div.textContent = text;
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+        return div;
       }
     </script>
   </body>
