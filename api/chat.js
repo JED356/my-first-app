@@ -24,7 +24,7 @@ export default async function handler(req, res) {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-opus-4-20250514',
+        model: 'claude-sonnet-4-5',
         max_tokens: 1024,
         system: 'You are a helpful Australian tax assistant. Give clear, concise answers about Australian tax. Always remind users to consult a registered tax agent for formal advice.',
         messages: [
