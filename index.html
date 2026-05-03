@@ -286,7 +286,8 @@
       </div>
 
     </div>
-// Load conversation history when page opens
+    <script>
+        // Load conversation history when page opens
       async function loadHistory() {
         try {
           const response = await fetch('/api/history');
@@ -322,7 +323,7 @@
 
       // Run when page loads
       window.onload = loadHistory;
-    <script>
+
       // Tax calculator
       function calculate() {
         const income = parseFloat(document.getElementById('income').value);
