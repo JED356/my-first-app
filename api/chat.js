@@ -24,6 +24,20 @@ export default async function handler(req, res) {
   );
 
   try {
+    // Get conversation history first
+    const { data: history } = await supabase
+      .from('conversations')
+      .select('*')
+      .order('created_at', { ascending: true })
+      .limit(10);
+
+    // Build previous messages for Claude context
+    const previousMessages = history ? history.flatMap(conv => ([
+      { role: 'user', content: conv.question },
+      { role: 'assistant', content: conv.answer }
+    ])) : [];
+
+    // Call Claude API with full history
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -31,18 +45,6 @@ export default async function handler(req, res) {
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01'
       },
-      // Build conversation history for Claude
-      const { data: history } = await supabase
-        .from('conversations')
-        .select('*')
-        .order('created_at', { ascending: true })
-        .limit(10);
-
-      const previousMessages = history ? history.flatMap(conv => ([
-        { role: 'user', content: conv.question },
-        { role: 'assistant', content: conv.answer }
-      ])) : [];
-
       body: JSON.stringify({
         model: 'claude-sonnet-4-5',
         max_tokens: 1024,
