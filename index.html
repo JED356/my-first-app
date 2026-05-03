@@ -320,9 +320,11 @@
       }
 
         // Load conversation history when page opens
-      async function loadHistory() {
+async function loadHistory() {
         try {
-          const response = await fetch('/api/history');
+          const response = await fetch('/api/history', {
+            headers: { Authorization: `Bearer ${currentUser.token}` }
+          });
           const data = await response.json();
 
           if (data.conversations && data.conversations.length > 0) {
