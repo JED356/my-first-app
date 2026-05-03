@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { message } = req.body;
+const { message, userId } = req.body;
 
   if (!message) {
     return res.status(400).json({ error: 'No message provided' });
@@ -55,8 +55,8 @@ export default async function handler(req, res) {
     // Save conversation to database
     const { error: dbError } = await supabase
       .from('conversations')
-      .insert([{ question: message, answer: reply }]);
-
+      .insert([{ question: message, answer: reply, user_id: userId }]);
+      
     if (dbError) {
       console.error('Database error:', dbError);
       return res.status(200).json({ reply, dbError: dbError.message });

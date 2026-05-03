@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tax Calculator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
       * {
         box-sizing: border-box;
@@ -228,7 +229,10 @@
 
       <!-- Tax Calculator Card -->
       <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
         <div class="logo">TaxAI</div>
+        <button onclick="handleLogout()" style="width:auto; padding:8px 16px; font-size:13px;">Sign Out</button>
+      </div>
         <h1>Income Tax Estimator</h1>
         <p class="subtitle">Enter your annual income to get a quick estimate.</p>
 
@@ -287,6 +291,29 @@
 
     </div>
     <script>
+        const supabase = window.supabase.createClient(
+        'https://fnpzokbcdgbvxvbklheb.supabase.co',
+        'sb_publishable_FA5KY6NQ-Sc5U-dk5SHoCg_-Fw-wSjr'
+      );
+
+      let currentUser = null;
+
+      // Check if logged in
+      async function checkAuth() {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          window.location.href = '/login.html';
+        } else {
+          currentUser = session.user;
+          loadHistory();
+        }
+      }
+
+      async function handleLogout() {
+        await supabase.auth.signOut();
+        window.location.href = '/login.html';
+      }
+
         // Load conversation history when page opens
       async function loadHistory() {
         try {
@@ -322,7 +349,7 @@
       }
 
       // Run when page loads
-      window.onload = loadHistory;
+      window.onload = checkAuth;
 
       // Tax calculator
       function calculate() {
@@ -382,9 +409,8 @@
           const response = await fetch('/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message })
+            body: JSON.stringify({ message, userId: currentUser.id })
           });
-
           const data = await response.json();
 
           // Remove thinking indicator
