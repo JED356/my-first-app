@@ -308,6 +308,7 @@
           window.location.href = '/login.html';
         } else {
           currentUser = session.user;
+          currentUser.token = session.access_token;
           document.getElementById('user-email').textContent = currentUser.email;
           loadHistory();
         }
@@ -413,7 +414,7 @@
           const response = await fetch('/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message, userId: currentUser.id })
+            body: JSON.stringify({ message, userId: currentUser.id, token: currentUser.token })
           });
           const data = await response.json();
 

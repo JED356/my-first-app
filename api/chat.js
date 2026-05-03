@@ -1,17 +1,19 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
+const { createClient } = await import('@supabase/supabase-js');
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-const { message, userId } = req.body;
+const { message, userId, token } = req.body;
 
+const supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_ANON_KEY,
+    { global: { headers: { Authorization: `Bearer ${token}` } } }
+  );
   if (!message) {
     return res.status(400).json({ error: 'No message provided' });
   }
@@ -56,7 +58,7 @@ const { message, userId } = req.body;
     const { error: dbError } = await supabase
       .from('conversations')
       .insert([{ question: message, answer: reply, user_id: userId }]);
-      
+
     if (dbError) {
       console.error('Database error:', dbError);
       return res.status(200).json({ reply, dbError: dbError.message });
