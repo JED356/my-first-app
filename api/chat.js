@@ -31,11 +31,24 @@ export default async function handler(req, res) {
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01'
       },
+      // Build conversation history for Claude
+      const { data: history } = await supabase
+        .from('conversations')
+        .select('*')
+        .order('created_at', { ascending: true })
+        .limit(10);
+
+      const previousMessages = history ? history.flatMap(conv => ([
+        { role: 'user', content: conv.question },
+        { role: 'assistant', content: conv.answer }
+      ])) : [];
+
       body: JSON.stringify({
         model: 'claude-sonnet-4-5',
         max_tokens: 1024,
         system: 'You are a helpful Australian tax assistant. Give clear, concise answers about Australian tax. Always remind users to consult a registered tax agent for formal advice.',
         messages: [
+          ...previousMessages,
           { role: 'user', content: message }
         ]
       })
