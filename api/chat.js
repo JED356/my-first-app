@@ -1,19 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 
-const { createClient } = await import('@supabase/supabase-js');
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-const { message, userId, token } = req.body;
+  const { message, userId, token } = req.body;
 
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_ANON_KEY,
-    { global: { headers: { Authorization: `Bearer ${token}` } } }
-  );
   if (!message) {
     return res.status(400).json({ error: 'No message provided' });
   }
@@ -23,8 +16,14 @@ const supabase = createClient(
     return res.status(500).json({ error: 'API key not found in environment' });
   }
 
+  // Create Supabase client with user's auth token
+  const supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_ANON_KEY,
+    { global: { headers: { Authorization: `Bearer ${token}` } } }
+  );
+
   try {
-    // Call Claude API
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
